@@ -288,7 +288,7 @@ CREATE TABLE test(
     my_datetime DATETIME
 );
 ```
-## 2. Insert currend date and time into the table:
+### 2. Insert currend date and time into the table:
 ```sql
 INSERT INTO test
 VALUES (CURRENT_DATE(), CURRENT_TIME(), NOW());
@@ -297,7 +297,7 @@ VALUES (CURRENT_DATE(), CURRENT_TIME(), NOW());
 SELECT * FROM test;
 ```
 
-## 3. Manipulate date time:
+### 3. Manipulate date time:
 ```sql
 INSERT INTO test
 VALUES (CURRENT_DATE() + 1, CURRENT_TIME(), NOW());
@@ -309,3 +309,92 @@ VALUES (CURRENT_DATE() + 1, CURRENT_TIME(), NOW());
 <br>
 <br>
 
+# SQL Constraints:
+
+### Let's re-create the above table using some common constraints like: `NOT NULL`, `UNIQUE`, `DEFAULT`, `CHECK`, `PRIMARY KEY`
+
+```sql
+CREATE TABLE user (
+  id INT AUTO_INCREMENT,
+  first_name VARCHAR(100) NOT NULL,         -- cannot be null
+  last_name VARCHAR(100),
+  email VARCHAR(50) UNIQUE,                 -- must be unique
+  password VARCHAR(20) NOT NULL,            -- ensure it's not null
+  is_admin TINYINT(1) DEFAULT 0,            -- default: not admin
+  register_date DATETIME DEFAULT NOW(),     -- auto set current timestamp
+  CHECK chk_pass_len (LENGTH(password) >= 6),            -- min password length
+  -- chk_pass_len is the name of the constraint that we can drop later.
+  PRIMARY KEY(id) -- this field will be unique and not null. we can have only one primary key per table
+);
+```
+> `AUTO_INCREMENT` attribute increases the value of id by 1 with the addition of each row.
+
+### Add constraint later:
+```sql
+ALTER TABLE users
+ADD CONSTRAINT chk_pass_len CHECK(LENGTH(password) >= 6);
+```
+
+### Delete any constraint:
+```sql
+ALTER TABLE users
+DROP CHECK chk_pass_len;
+```
+
+### Set auto increment to start from a definite value:
+```sql
+ALTER TABLE users
+AUTO_INCREMENT = 1000;
+```
+
+
+# FOREIGN KEYS
+> Set link between two tables 
+
+![Foreign_Key](assets/foreignkey.png)
+
+### Add foreign key constraint.
+
+1. Let's create a customers table and populate it.
+```sql
+CREATE TABLE customers(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50)
+);
+
+INSERT INTO customers (first_name, last_name) VALUES
+("Tony", "Stark"),
+("Steve", "Rogers"),
+("Natasha", "Romanoff");
+```
+
+2. Create a customers table and populate.
+```sql
+CREATE TABLE transactions(
+    transaction_id INT PRIMARY KEY AUTO_INCREMENT,
+    amount DECIMAL(5, 2), -- (total no. of digits, total no. of digits after decimal e.g 123.45)
+    customer_id INT,
+    FOREIGN KEY(customer_id) REFERENCES customers(id)
+);
+
+-- Set starting AUTO_INCREMENT value to 1000
+ALTER TABLE transactions AUTO_INCREMENT = 1000;
+-- N.B we can't do this directly while creating table idk why.
+
+
+-- Populate the table
+INSERT INTO transactions(amount, customer_id) VALUES
+(2.33, 2),
+(4.55, 1),
+(1.24, 3),
+(3.44, 1);
+```
+> Now a link has been created between customers and transactions. We can't delete a customer from customers table whose id is here in transaction table until we define certain properties. We will explore them in the upcoming part.
+
+### Add a name to the foreign key:
+```sql
+ALTER TABLE transactions
+ADD CONSTRAINT fk_customer_id
+FOREIGN KEY(customer_id) REFERENCES customers(id);
+```
