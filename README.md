@@ -1,10 +1,12 @@
-# All MySQL commands in one place.
+<img src="assets/mysql.webp" width="" height="200">
+
+# All MySQL commands in one place 💁.
 It contains all the necessary commands to get started with mysql using shell to interact with the mysql database.
 
 <br>
 <br>
 
-# User commands:
+# User commands 🧑‍💻:
 
 ### Login
 ```bash
@@ -50,7 +52,7 @@ exit;
 <br>
 <br>
 
-# Databse Commands:
+# Databse Commands 🗄️:
 
 ### Show Databases
 ```sql
