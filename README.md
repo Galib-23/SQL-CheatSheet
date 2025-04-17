@@ -277,6 +277,7 @@ COMMIT;
 
 <br>
 <br>
+<br>
 
 # Check current date and time:
 
@@ -306,6 +307,7 @@ VALUES (CURRENT_DATE() + 1, CURRENT_TIME(), NOW());
 ```
 
 
+<br>
 <br>
 <br>
 
@@ -347,6 +349,10 @@ ALTER TABLE users
 AUTO_INCREMENT = 1000;
 ```
 
+<br>
+<br>
+<br>
+
 
 # FOREIGN KEYS
 > Set link between two tables 
@@ -356,40 +362,40 @@ AUTO_INCREMENT = 1000;
 ### Add foreign key constraint.
 
 1. Let's create a customers table and populate it.
-```sql
-CREATE TABLE customers(
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    first_name VARCHAR(50),
-    last_name VARCHAR(50)
-);
+    ```sql
+    CREATE TABLE customers(
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        first_name VARCHAR(50),
+        last_name VARCHAR(50)
+    );
 
-INSERT INTO customers (first_name, last_name) VALUES
-("Tony", "Stark"),
-("Steve", "Rogers"),
-("Natasha", "Romanoff");
-```
+    INSERT INTO customers (first_name, last_name) VALUES
+    ("Tony", "Stark"),
+    ("Steve", "Rogers"),
+    ("Natasha", "Romanoff");
+    ```
 
 2. Create a customers table and populate.
-```sql
-CREATE TABLE transactions(
-    transaction_id INT PRIMARY KEY AUTO_INCREMENT,
-    amount DECIMAL(5, 2), -- (total no. of digits, total no. of digits after decimal e.g 123.45)
-    customer_id INT,
-    FOREIGN KEY(customer_id) REFERENCES customers(id)
-);
+    ```sql
+    CREATE TABLE transactions(
+        transaction_id INT PRIMARY KEY AUTO_INCREMENT,
+        amount DECIMAL(5, 2), -- (total no. of digits, total no. of digits after decimal e.g 123.45)
+        customer_id INT,
+        FOREIGN KEY(customer_id) REFERENCES customers(id)
+    );
 
--- Set starting AUTO_INCREMENT value to 1000
-ALTER TABLE transactions AUTO_INCREMENT = 1000;
--- N.B we can't do this directly while creating table idk why.
+    -- Set starting AUTO_INCREMENT value to 1000
+    ALTER TABLE transactions AUTO_INCREMENT = 1000;
+    -- N.B. we can't do this directly while creating table idk why.
 
+    -- Populate the table
+    INSERT INTO transactions(amount, customer_id) VALUES
+    (2.33, 2),
+    (4.55, 1),
+    (1.24, 3),
+    (3.44, 1);
+    ```
 
--- Populate the table
-INSERT INTO transactions(amount, customer_id) VALUES
-(2.33, 2),
-(4.55, 1),
-(1.24, 3),
-(3.44, 1);
-```
 > Now a link has been created between customers and transactions. We can't delete a customer from customers table whose id is here in transaction table until we define certain properties. We will explore them in the upcoming part.
 
 ### Add a name to the foreign key:
@@ -398,3 +404,81 @@ ALTER TABLE transactions
 ADD CONSTRAINT fk_customer_id
 FOREIGN KEY(customer_id) REFERENCES customers(id);
 ```
+
+
+<br>
+<br>
+<br>
+
+# JOINS:
+
+<br>
+
+__Firstly let us add some more rows to the transaction table:__
+```sql
+INSERT INTO transactions(amount, customer_id) VALUES
+    (6.24, NULL),
+    (3.17, NULL);
+
+SELECT * FROM transactions;
+```
+![](assets/transactions.png)
+
+<br>
+
+__Let's Add some more customers__
+```sql
+INSERT INTO customers (first_name, last_name) VALUES
+    ("Bruce", "Banner"),
+    ("Stephen", "Strange");
+
+SELECT * FROM customers;
+```
+![](assets/customers.png)
+
+<br>
+
+### Inner Join: 
+
+> It shows us only the matching rows from both tables.
+
+```sql
+SELECT *
+FROM transactions INNER JOIN customers
+ON transactions.customer_id = customers.id;
+```
+![](assets/innerjoin.png)
+
+<br>
+<br>
+
+### Left Join:
+
+> Whole left table and only matching rows from right table
+
+```sql
+SELECT *
+FROM transactions LEFT JOIN customers
+ON transactions.customer_id = customers.id;
+```
+
+![](assets/leftjoin.png)
+
+
+### Right Join.
+
+> Whole right table and only matching rows from the left table.
+
+```sql
+SELECT *
+FROM transactions RIGHT JOIN customers
+ON transactions.customer_id = customers.id;
+```
+
+![](assets/rightjoin.png)
+
+
+<br>
+<br>
+<br>
+
