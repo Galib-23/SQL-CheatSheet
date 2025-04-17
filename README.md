@@ -806,3 +806,46 @@ DELIMITER ;
 DROP PROCEDURE get_customers;
 ```
 
+### Procedure with parameters:
+- create
+    ```sql
+    DELIMITER $$
+    CREATE PROCEDURE find_customer(IN customer_id INT)
+    BEGIN
+        SELECT *
+        FROM customers
+        WHERE id = customer_id;
+    END $$
+    DELIMITER ;
+    ```
+
+- call
+    ```sql
+    CALL find_customer(2);
+    ```
+
+<br>
+<br>
+<br>
+
+# TRIGGERS
+
+When an event happens, do something. ex. (INSERT, UPDATE, DELETE). checks data, handles errors, auditing tables
+
+### Let's say we have this table employees:
+
+![](assets/trigger.png)
+
+#### On every change of the hourly_pay we will update the salary by trigger.
+
+```sql
+CREATE TRIGGER before_hourly_pay_update
+BEFORE UPDATE ON employees
+FOR EACH ROW
+SET NEW.salary = (NEW.hourly_pay * 2080);
+```
+
+### Show triggers
+```sql
+SHOW TRIGGERS;
+```
