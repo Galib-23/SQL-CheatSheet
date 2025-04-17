@@ -217,8 +217,9 @@ WHERE id = 3;
 
 ### Set some fields equal to `NULL`
 ```sql
-UPDATE users
+UPDATE users;
 SET password = NULL
+WHERE is_admin = 0;
 ```
 
 ### Set field of all rows.
@@ -478,7 +479,330 @@ ON transactions.customer_id = customers.id;
 ![](assets/rightjoin.png)
 
 
+### Self Join
+- Firstly lets add a new field to the customers table:
+    ```sql
+    ALTER TABLE customers
+    ADD referral_id INT;
+    ```
+
+- Populate the column (customers within same table referred each other randomly)
+    ```sql
+    UPDATE customers
+    SET referral_id = 1
+    WHERE id = 2;
+
+    UPDATE customers
+    SET referral_id = 2
+    WHERE id = 3;
+
+    UPDATE customers
+    SET referral_id = 2
+    WHERE id = 4;
+
+    UPDATE customers
+    SET referral_id = 4
+    WHERE id = 5;
+
+    SELECT * FROM customers;
+    ```
+    ![](assets/afterref.png)
+
+- Perform the self join
+    ```sql
+    SELECT * 
+    FROM customers AS a
+    INNER JOIN customers AS b
+    ON a.referral_id = b.id;
+    ```
+    ![](assets/selfjoin.png)
+
 <br>
 <br>
 <br>
+
+
+# Functions:
+
+### `COUNT` - Number of rows in a column.
+
+```sql
+SELECT COUNT(amount)
+FROM transactions;
+```
+
+### `MAX` - Maximum of any column.
+```sql
+SELECT MAX(amount) AS maximum --alias
+FROM transactions;
+```
+
+### `MIN` - Finds minimum
+
+### `AVG` - Finds average of any column
+```sql
+SELECT AVG(amount) AS average
+FROM transactions;
+```
+
+### `SUM` - Finds the sum
+```sql
+SELECT SUM(amount) AS sum
+FROM transactions;
+```
+
+### `CONCAT` - Concatenates two columns.
+```sql
+SELECT CONCAT(first_name, " ", last_name) AS full_name
+FROM customers;
+```
+
+<br>
+<br>
+<br>
+
+# Logical Operators
+
+### Firstly lets add some more field to customers table:
+```sql
+ALTER TABLE customers
+ADD COLUMN age INT,
+ADD COLUMN is_member BOOLEAN DEFAULT FALSE;
+```
+
+> add age and is_member data
+
+### `AND` Operator - Both conditions must be true
+```sql
+SELECT * FROM customers
+WHERE age > 18 AND is_member = TRUE;
+```
+
+### `OR` Operator - Only one condition needs to be true
+```sql
+SELECT * FROM customers
+WHERE age < 18 OR is_member = FALSE;
+```
+
+### `NOT` Operator 
+```sql
+SELECT * FROM customers
+WHERE NOT is_member = TRUE;
+```
+
+### `BETWEEN` Operator
+```sql
+SELECT * FROM customers
+WHERE age BETWEEN 18 AND 24;
+```
+
+### `IN` Operator
+```sql
+SELECT * FROM customers
+WHERE first_name IN ("Steve", "Tony");
+```
+
+<br>
+<br>
+<br>
+
+
+# Wild Cards
+
+| Pattern                               | Description                                                                  |
+|---------------------------------------|------------------------------------------------------------------------------|
+| `WHERE first_name LIKE 'a%'`       | Finds any values that **start with** "a"                                     |
+| `WHERE first_name LIKE '%a'`       | Finds any values that **end with** "a"                                       |
+| `WHERE first_name LIKE '%or%'`     | Finds any values that **contain** "or" in **any position**                   |
+| `WHERE first_name LIKE '_r%'`      | Finds any values that have "r" in the **second position**                    |
+| `WHERE first_name LIKE 'a_%_%'`    | Finds any values that **start with "a"** and are **at least 3 characters**   |
+| `WHERE last_name LIKE 'a%o'`       | Finds any values that **start with "a"** and **end with "o"**                |
+| `WHERE last_name LIKE '__a%'`             | Finds any values where the **third character is "a"**                        |
+| `WHERE last_name LIKE '___'`              | Finds any values that are **exactly 3 characters long**                      |
+| `WHERE last_name LIKE '%\%%' ESCAPE '\'`  | Finds any values that **contain the actual percent symbol (%)**              |
+| `WHERE last_name LIKE '%\_%' ESCAPE '\'`  | Finds any values that **contain the actual underscore symbol (_)***          |
+
+<br>
+<br>
+<br>
+
+# `ORDER BY` Clause.
+
+> Shows the data of the table in ascending or descending order.
+### Ascending order
+```sql
+SELECT * FROM customers
+ORDER BY last_name;
+```
+
+### Descending order
+```sql
+SELECT * FROM customers
+ORDER BY last_name DESC;
+```
+
+
+<br>
+<br>
+<br>
+
+
+# `LIMIT` Clause.
+
+> used for pagination
+
+### Limit
+```sql
+SELECT * FROM customers
+LIMIT 2;
+```
+
+### Offset
+```sql
+SELECT * FROM customers
+LIMIT 20, 10; -- show next 10 customers after 20. offset = 20, limit = 10
+```
+
+<br>
+<br>
+<br>
+
+# VIEWS
+> it's not real data stored separately, but rather a saved SQL query that you can treat like a table.
+
+1. Create view
+    ```sql
+    CREATE VIEW customer_name AS
+    SELECT CONCAT(first_name, " ", last_name) AS full_name
+    FROM customers;
+    ```
+
+2. View the created view
+    ```sql
+    SELECT * FROM customer_name;
+    ```
+
+
+<br>
+<br>
+<br>
+
+
+# `INDEX`
+
+- It's a BTree data structure
+- Used to find values within a specific column more quickly
+- MySQL normally searches sequentially through a column
+- Larger the column , more expensive the operation is
+- Using index minimizes `SELECT` time but `UPDATE` takes more time.
+
+### Show indexes
+```sql
+SHOW INDEXES FROM customers;
+```
+
+> You will see customer_id is automatically indexed.
+
+### Create index on a particular column.
+```sql
+CREATE INDEX last_name_idx
+ON customers(last_name);
+```
+
+### Multi column index.
+```sql
+CREATE INDEX last_name_first_name_idx
+ON customers(last_name, first_name);
+
+-- It first searches on last name then first name
+```
+
+<br>
+<br>
+<br>
+
+# Subqueries
+
+```sql
+SELECT * 
+FROM transactions
+WHERE amount > (
+    SELECT AVG(amount) FROM transactions
+);
+```
+
+
+<br>
+<br>
+<br>
+
+# `GROUP BY` Clause
+### Let's say we have this table:
+
+![](assets/grpbypre.png)
+
+### Give group by command:
+```sql
+SELECT SUM(amount), order_date
+FROM transactions
+GROUP BY order_date;
+```
+![](assets/grpby.png)
+
+<br>
+<br>
+
+# `ROLLUP` Clause
+- It's the extension of `GROUP BY` clause
+- produces another row and shows the GRAND TOTAL (super-aggregate value)
+
+### In the previous transaction table:
+
+```sql
+SELECT SUM(amount), order_date
+FROM transactions
+GROUP BY order_date WITH ROLLUP;
+```
+
+![](assets/rollup.png)
+
+# `ON DELETE` clause
+
+-- ON DELETE SET NULL = When a FK is deleted, replace FK with null
+-- ON DELETE CASCADE = WHEN a FK is deleted, delete the entire row
+
+```sql
+CREATE TABLE transactions(
+    transaction_id INT PRIMARY KEY AUTO_INCREMENT,
+    amount DECIMAL(5, 2), -- (total no. of digits, total no. of digits after decimal e.g 123.45)
+    customer_id INT,
+    FOREIGN KEY(customer_id) REFERENCES customers(id)
+    ON DELETE CASCADE
+    );
+```
+
+
+<br>
+<br>
+<br>
+
+
+# Stored Procedures
+Its a prepared SQL code that you can save and run again later.
+
+### Create Procedure:
+```sql
+DELIMITER $$
+CREATE PROCEDURE get_customers()
+BEGIN
+    SELECT * FROM customers;
+END $$
+DELIMITER ;
+```
+> `DELEMITER` can set character/'s that defines the end of a query. We are setting the DELIMITER to be $$ because if it was ; then the query would stop at customers; and we won't be able to create the procedure.
+
+### Delete Procedure:
+```sql
+DROP PROCEDURE get_customers;
+```
 
